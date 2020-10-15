@@ -223,7 +223,7 @@ void UKF::Prediction(double delta_t) {
   for (int i = 0; i < 2 * n_aug_ + 1; ++i)
   {
       // state difference
-      VectorXd x_diff = Xsig_pred_.col(i) - x;
+      VectorXd x_diff = Xsig_pred_.col(i) - x_;
       // angle normalisation
       while (x_diff(3) > M_PI) x_diff(3) -= 2. * M_PI;
       while (x_diff(3) < -M_PI) x_diff(3) += 2. * M_PI;
@@ -251,7 +251,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   // create matrix for sigma points in measurement space
   MatrixXd Zsig = MatrixXd(n_z, 2 * n_aug_ + 1);
 
-  for (int i = 0; i < 2 * n_aug_ + 1)
+  for (int i = 0; i < 2 * n_aug_ + 1; ++i)
   {
       double p_x = Xsig_pred_(0, i);
       double p_y = Xsig_pred_(1, i);
@@ -315,7 +315,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   }
 
   // calculate Kalman gain
-  MatrixXd K = Tc * S.inverse()
+  MatrixXd K = Tc * S.inverse();
 
   // incoming lidar measurement
   VectorXd z = meas_package.raw_measurements_;
@@ -360,7 +360,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
       // measurement model
       Zsig(0,i) = sqrt(p_x*p_x + p_y*p_y);                             // r
       Zsig(1,i) = atan2(p_y,p_x);                                      // phi
-      Zsig(2,i) = (p_x * v_1 + p_y * v2) / sqrt(p_x*p_x + p_y*p_y);    // r_dot
+      Zsig(2,i) = (p_x * v1 + p_y * v2) / sqrt(p_x*p_x + p_y*p_y);    // r_dot
   }
 
   /**
