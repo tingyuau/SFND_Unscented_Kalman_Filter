@@ -55,10 +55,10 @@ UKF::UKF() {
    * Hint: one or more values initialized above might be wildly off...
    */
 
-  // Initialise velocity, yaw angle, and yaw rate values for state vector x
-  x_(2) = 0;
-  x_(3) = 0;
-  x_(4) = 0;
+  // // Initialise velocity, yaw angle, and yaw rate values for state vector x
+  // x_(2) = 0;
+  // x_(3) = 0;
+  // x_(4) = 0;
 
   // Initialise state covariance matrix P
   // TODO: change later to s.d. of measurement
@@ -98,21 +98,66 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    switch (meas_package.sensor_type_)
    {
       case MeasurementPackage::LASER:
-        if (!is_initialized_)
-        {
-            x_.head(2) = meas_package.raw_measurements_;
-            is_initialized_ = true;
-        }
+      {
+          if (!is_initialized_)
+          {
+              // initialise state with lidar measurements
+              x_.head(2) = meas_package.raw_measurements_;
+              x_(2) = 0;
+              x_(3) = 0;
+              x_(4) = 0;
+
+              // update true state time
+              time_us_ = meas_package.timestamp_;
+
+              is_initialized_ = true;
+              return;
+          }
+
+          // calculate dt and update true state time
+          double dt = (meas_package.timestamp_ - time_us_) / 1000000.0;
+          time_us_ = meas_package.timestamp_;
+
+          // prediction and update loop
+          Prediction(dt);
+          UpdateLidar(meas_package);
+      }
         break;
+
       case MeasurementPackage::RADAR:
-        if (!is_initialized_)
-        {
-            double rho = meas_package.raw_measurements_[0];
-            double phi = meas_package.raw_measurements_[1];
-            x_(0) = rho*cos(phi);
-            x_(1) = rho*sin(phi);
-            is_initialized_ = true;
-        }
+      {
+          if (!is_initialized_)
+          {
+              // initialise state with radar measurements
+              double rho = meas_package.raw_measurements_[0];
+              double phi = meas_package.raw_measurements_[1];
+              double rho_dot = meas_package.raw_measurements_[2];
+
+              double vx = rho_dot * cos(phi);
+              double vy = rho_dot * sin(phi);
+
+              x_(0) = rho*cos(phi);
+              x_(1) = rho*sin(phi);
+              // x_(2) = sqrt(vx * vx + vy * vy);
+              x_(2) = 0;
+              x_(3) = 0;
+              x_(4) = 0;
+
+              // update true state time
+              time_us_ = meas_package.timestamp_;
+
+              is_initialized_ = true;
+              return;
+          }
+
+          // calculate dt and update true state time
+          double dt = (meas_package.timestamp_ - time_us_) / 1000000.0;
+          time_us_ = meas_package.timestamp_;
+
+          // prediction and update loop
+          Prediction(dt);
+          UpdateRadar(meas_package);
+      }
         break;
    }
 }
