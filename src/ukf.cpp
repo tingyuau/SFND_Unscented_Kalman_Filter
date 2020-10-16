@@ -119,8 +119,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
           time_us_ = meas_package.timestamp_;
 
           // prediction and update loop
-          Prediction(dt);
-          UpdateLidar(meas_package);
+          // Prediction(dt);
+          // UpdateLidar(meas_package);
       }
         break;
 
@@ -155,8 +155,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
           time_us_ = meas_package.timestamp_;
 
           // prediction and update loop
-          Prediction(dt);
-          UpdateRadar(meas_package);
+          // Prediction(dt);
+          // UpdateRadar(meas_package);
       }
         break;
    }
