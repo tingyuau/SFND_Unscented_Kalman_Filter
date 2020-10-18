@@ -1,5 +1,6 @@
 #include "ukf.h"
 #include "Eigen/Dense"
+#include "iostream"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -69,22 +70,23 @@ UKF::UKF() {
        0, 0, 0, 0, 1;
 
   // state dimension
-  int n_x_ = 5;
+  n_x_ = 5;
 
   // augmented state dimension
-  int n_aug_ = 7;
+  n_aug_ = 7;
+
+  // create matrix with predicted sigma points as columns
+  Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
 
   // spreading parameter for sigma points generation
-  double lambda_ = 3 - n_aug_;
+  lambda_ = 3 - n_aug_;
 
   // create vector for weights
-  VectorXd weights_ = VectorXd(2 * n_aug_ + 1);
-  double weight_0 = lambda_ / (lambda_ + n_aug_);
-  weights_(0) = weight_0;
+  weights_ = VectorXd(2 * n_aug_ + 1);
+  weights_(0) = lambda_ / (lambda_ + n_aug_);
   for (int i = 1; i < 2 * n_aug_ + 1; ++i)
   {
-      double weight = 0.5 / (n_aug_ + lambda_);
-      weights_(i) = weight;
+      weights_(i) = 0.5 / (n_aug_ + lambda_);
   }
 }
 
@@ -119,8 +121,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
           time_us_ = meas_package.timestamp_;
 
           // prediction and update loop
-          // Prediction(dt);
-          // UpdateLidar(meas_package);
+          Prediction(dt);
+          UpdateLidar(meas_package);
       }
         break;
 
@@ -155,8 +157,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
           time_us_ = meas_package.timestamp_;
 
           // prediction and update loop
-          // Prediction(dt);
-          // UpdateRadar(meas_package);
+          Prediction(dt);
+          UpdateRadar(meas_package);
       }
         break;
    }
@@ -201,9 +203,6 @@ void UKF::Prediction(double delta_t) {
   /**
    * 2. predict sigma points
    */
-
-  // create matrix with predicted sigma points as columns
-  MatrixXd Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
 
   // predict sigma points
   for (int i = 0; i < 2*n_aug_; ++i)
@@ -275,6 +274,7 @@ void UKF::Prediction(double delta_t) {
 
       P_ = P_ + weights_(i) * x_diff * x_diff.transpose();
   }
+  // std::cout << "predicted state x_: " <<x_ <<std::endl;
 
 }
 
@@ -371,6 +371,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   // update state mean and covariance matrix
   x_ = x_ + K * z_diff;
   P_ = P_ + K * S * K.transpose();
+  // std::cout << "updated from lidar x_: " << x_ <<std::endl;
 
 }
 
@@ -405,7 +406,15 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
       // measurement model
       Zsig(0,i) = sqrt(p_x*p_x + p_y*p_y);                             // r
       Zsig(1,i) = atan2(p_y,p_x);                                      // phi
-      Zsig(2,i) = (p_x * v1 + p_y * v2) / sqrt(p_x*p_x + p_y*p_y);    // r_dot
+      // avoid division by zero
+      if (fabs(p_x) > 0.001 && fabs(p_y) > 0.001)
+      {
+          Zsig(2,i) = (p_x * v1 + p_y * v2) / sqrt(p_x*p_x + p_y*p_y);    // r_dot
+      }
+      else
+      {
+        Zsig(2,i) = 0;
+      }
   }
 
   /**
@@ -489,4 +498,5 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   // update state mean and covariance matrix
   x_ = x_ + K * z_diff;
   P_ = P_ - K * S * K.transpose();
+  // std::cout << "updated from radar x_: " << x_ <<std::endl;
 }
