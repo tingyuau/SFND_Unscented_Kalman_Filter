@@ -4,6 +4,7 @@
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+using namespace std;
 
 /**
  * Initializes Unscented Kalman filter
@@ -112,6 +113,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
               time_us_ = meas_package.timestamp_;
 
               is_initialized_ = true;
+              cout << "initialised, x_: " << x_ <<endl;
               return;
           }
 
@@ -148,6 +150,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
               time_us_ = meas_package.timestamp_;
 
               is_initialized_ = true;
+              cout << "initialised, x_: " << x_ <<endl;
               return;
           }
 
@@ -204,7 +207,7 @@ void UKF::Prediction(double delta_t) {
    */
 
   // predict sigma points
-  for (int i = 0; i < 2*n_aug_; ++i)
+  for (int i = 0; i < 2 * n_aug_ + 1; ++i)
   {
       double p_x      = Xsig_aug(0,i);
       double p_y      = Xsig_aug(1,i);
@@ -273,7 +276,7 @@ void UKF::Prediction(double delta_t) {
 
       P_ = P_ + weights_(i) * x_diff * x_diff.transpose();
   }
-  // std::cout << "predicted state x_: " <<x_ <<std::endl;
+  cout << "predicted state x_: " <<x_ <<endl;
 
 }
 
@@ -370,7 +373,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   // update state mean and covariance matrix
   x_ = x_ + K * z_diff;
   P_ = P_ + K * S * K.transpose();
-  // std::cout << "updated from lidar x_: " << x_ <<std::endl;
+  cout << "updated from lidar x_: " << x_ <<endl;
 
 }
 
@@ -406,14 +409,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
       Zsig(0,i) = sqrt(p_x*p_x + p_y*p_y);                             // r
       Zsig(1,i) = atan2(p_y,p_x);                                      // phi
       // avoid division by zero
-      if (fabs(p_x) > 0.001 && fabs(p_y) > 0.001)
-      {
-          Zsig(2,i) = (p_x * v1 + p_y * v2) / sqrt(p_x*p_x + p_y*p_y);    // r_dot
-      }
-      else
-      {
-          Zsig(2,i) = 0;
-      }
+      Zsig(2,i) = (p_x * v1 + p_y * v2) / sqrt(p_x*p_x + p_y*p_y);    // r_dot
   }
 
   /**
@@ -483,7 +479,6 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
   // calculate Kalman gain
   MatrixXd K = Tc * S.inverse();
-
   // incoming radar measurement
   VectorXd z = meas_package.raw_measurements_;
 
@@ -497,5 +492,5 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   // update state mean and covariance matrix
   x_ = x_ + K * z_diff;
   P_ = P_ - K * S * K.transpose();
-  // std::cout << "updated from radar x_: " << x_ <<std::endl;
+  cout << "updated from radar x_: " << x_ <<endl;
 }

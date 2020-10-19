@@ -4,6 +4,9 @@
 
 //#include "render/render.h"
 #include "highway.h"
+#include "iostream"
+
+using namespace std;
 
 int main(int argc, char** argv)
 {
@@ -32,6 +35,7 @@ int main(int argc, char** argv)
 		viewer->removeAllPointClouds();
 		viewer->removeAllShapes();
 
+		cout << "frame: " << frame_count << endl;
 		//stepHighway(egoVelocity,time_us, frame_per_sec, viewer);
 		highway.stepHighway(egoVelocity,time_us, frame_per_sec, viewer);
 		viewer->spinOnce(1000/frame_per_sec);
