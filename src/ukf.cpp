@@ -26,7 +26,7 @@ UKF::UKF() {
   std_a_ = 9;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 30;
+  std_yawdd_ = 6.28;
 
   /**
    * DO NOT MODIFY measurement noise values below.
@@ -56,11 +56,6 @@ UKF::UKF() {
    * TODO: Complete the initialization. See ukf.h for other member properties.
    * Hint: one or more values initialized above might be wildly off...
    */
-
-  // // Initialise velocity, yaw angle, and yaw rate values for state vector x
-  // x_(2) = 0;
-  // x_(3) = 0;
-  // x_(4) = 0;
 
   // Initialise state covariance matrix P
   P_ << std_radr_*std_radr_, 0, 0, 0, 0,
@@ -141,7 +136,6 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 
               x_(0) = rho*cos(phi);
               x_(1) = rho*sin(phi);
-              // x_(2) = sqrt(vx * vx + vy * vy);
               x_(2) = 0;
               x_(3) = 0;
               x_(4) = 0;
