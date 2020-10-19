@@ -23,10 +23,10 @@ UKF::UKF() {
   P_ = MatrixXd(5, 5);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 9;
+  std_a_ = 1.0;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 6.28;
+  std_yawdd_ = 0.5;
 
   /**
    * DO NOT MODIFY measurement noise values below.
@@ -58,11 +58,17 @@ UKF::UKF() {
    */
 
   // Initialise state covariance matrix P
-  P_ << std_radr_*std_radr_, 0, 0, 0, 0,
-       0, std_radr_*std_radr_, 0, 0, 0,
-       0, 0, std_radrd_*std_radrd_, 0, 0,
-       0, 0, 0, std_radphi_*std_radphi_, 0,
-       0, 0, 0, 0, std_radrd_*std_radrd_;
+  // P_ << std_radr_*std_radr_, 0, 0, 0, 0,
+  //      0, std_radr_*std_radr_, 0, 0, 0,
+  //      0, 0, std_radrd_*std_radrd_, 0, 0,
+  //      0, 0, 0, std_radphi_*std_radphi_, 0,
+  //      0, 0, 0, 0, std_radrd_*std_radrd_;
+
+   P_ << 1, 0, 0, 0, 0,
+        0, 1, 0, 0, 0,
+        0, 0, 1, 0, 0,
+        0, 0, 0, 0.0225, 0,
+        0, 0, 0, 0, 0.0225;
 
   // state dimension
   n_x_ = 5;
