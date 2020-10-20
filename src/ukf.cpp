@@ -125,9 +125,9 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
           // prediction and update loop
           Prediction(dt);
           UpdateLidar(meas_package);
-      }
-        break;
 
+          break;
+      }
       case MeasurementPackage::RADAR:
       {
           if (!is_initialized_)
@@ -142,7 +142,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 
               x_(0) = rho*cos(phi);
               x_(1) = rho*sin(phi);
-              x_(2) = 0;
+              x_(2) = sqrt(vx * vx + vy * vy);
               x_(3) = 0;
               x_(4) = 0;
 
@@ -161,8 +161,9 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
           // prediction and update loop
           Prediction(dt);
           UpdateRadar(meas_package);
+
+          break;
       }
-        break;
    }
 }
 
