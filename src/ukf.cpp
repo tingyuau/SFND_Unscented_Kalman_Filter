@@ -1,6 +1,6 @@
 #include "ukf.h"
 #include "Eigen/Dense"
-#include "iostream"
+#include <iostream>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -332,6 +332,10 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
       // residual
       VectorXd z_diff = Zsig.col(i) - z_pred;
 
+      // angle normalisation
+      while (z_diff(1) > M_PI) z_diff(1) -= 2. * M_PI;
+      while (z_diff(1) < -M_PI) z_diff(1) += 2. * M_PI;
+
       S = S + weights_(i) * z_diff * z_diff.transpose();
   }
 
@@ -356,8 +360,16 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
       // residual
       VectorXd z_diff = Zsig.col(i) - z_pred;
 
+      // angle normalisation
+      while (z_diff(1) > M_PI) z_diff(1) -= 2. * M_PI;
+      while (z_diff(1) < -M_PI) z_diff(1) += 2. * M_PI;
+
       // state difference
       VectorXd x_diff = Xsig_pred_.col(i) - x_;
+
+      // angle normalisation
+      while (x_diff(3) > M_PI) x_diff(3) -= 2. * M_PI;
+      while (x_diff(3) < -M_PI) x_diff(3) += 2. * M_PI;
 
       Tc = Tc + weights_(i) * x_diff * z_diff.transpose();
   }
@@ -410,7 +422,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
       Zsig(0,i) = sqrt(p_x*p_x + p_y*p_y);                             // r
       Zsig(1,i) = atan2(p_y,p_x);                                      // phi
       // avoid division by zero
-      Zsig(2,i) = (p_x * v1 + p_y * v2) / sqrt(p_x*p_x + p_y*p_y);    // r_dot
+      Zsig(2,i) = (p_x * v1 + p_y * v2) / max(0.0001, sqrt(p_x*p_x + p_y*p_y));    // r_dot
   }
 
   /**
