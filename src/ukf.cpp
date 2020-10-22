@@ -58,17 +58,11 @@ UKF::UKF() {
    */
 
   // Initialise state covariance matrix P
-  // P_ << std_radr_*std_radr_, 0, 0, 0, 0,
-  //      0, std_radr_*std_radr_, 0, 0, 0,
-  //      0, 0, std_radrd_*std_radrd_, 0, 0,
-  //      0, 0, 0, std_radphi_*std_radphi_, 0,
-  //      0, 0, 0, 0, std_radrd_*std_radrd_;
-
-   P_ << 1, 0, 0, 0, 0,
-        0, 1, 0, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 0, 0.0225, 0,
-        0, 0, 0, 0, 0.0225;
+  P_ << std_radr_*std_radr_, 0, 0, 0, 0,
+       0, std_radr_*std_radr_, 0, 0, 0,
+       0, 0, std_radrd_*std_radrd_, 0, 0,
+       0, 0, 0, std_radphi_*std_radphi_, 0,
+       0, 0, 0, 0, std_radrd_*std_radrd_;
 
   // state dimension
   n_x_ = 5;
@@ -114,7 +108,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
               time_us_ = meas_package.timestamp_;
 
               is_initialized_ = true;
-              cout << "initialised, x_: " << x_ <<endl;
+              // cout << "initialised, x_: " << x_ <<endl;
               return;
           }
 
@@ -150,7 +144,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
               time_us_ = meas_package.timestamp_;
 
               is_initialized_ = true;
-              cout << "initialised, x_: " << x_ <<endl;
+              // cout << "initialised, x_: " << x_ <<endl;
               return;
           }
 
@@ -277,7 +271,7 @@ void UKF::Prediction(double delta_t) {
 
       P_ = P_ + weights_(i) * x_diff * x_diff.transpose();
   }
-  cout << "predicted state x_: " <<x_ <<endl;
+  // cout << "predicted state x_: " <<x_ <<endl;
 
 }
 
@@ -386,7 +380,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   // update state mean and covariance matrix
   x_ = x_ + K * z_diff;
   P_ = P_ - K * S * K.transpose();
-  cout << "updated from lidar x_: " << x_ <<endl;
+  // cout << "updated from lidar x_: " << x_ <<endl;
 
 }
 
@@ -505,5 +499,5 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   // update state mean and covariance matrix
   x_ = x_ + K * z_diff;
   P_ = P_ - K * S * K.transpose();
-  cout << "updated from radar x_: " << x_ <<endl;
+  // cout << "updated from radar x_: " << x_ <<endl;
 }
